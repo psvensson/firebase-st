@@ -132,9 +132,7 @@ Firebase >> secureJSONCallTo: url token: token [
 	"request setBearerAuthentication: token;"
 	finalurl :=	url,'?access_token=',token.
 	"finalurl := url."
-	Transcript
-		show: 'final url = ' , finalurl;
-		cr.
+	
 	client
 		url: finalurl;
 		ifFail: [ :ex | 
@@ -142,6 +140,53 @@ Firebase >> secureJSONCallTo: url token: token [
 				inform: 'get Network Error: ' , ex asString;
 				cr ];
 		get.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
+Firebase >> secureJSONDeleteCallTo: url token: token [
+	| fut finalurl |
+	fut := [ 
+		client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"
+	client
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	finalurl :=	url,'?access_token=',token.
+	"finalurl := url."
+	
+	client
+		url: finalurl;
+		ifFail: [ :ex | 
+			UIManager default
+				inform: 'delete Network Error: ' , ex asString;
+				cr ];
+		delete.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
+Firebase >> secureJSONPatchCallTo: url JSONContent: json token: token [
+	| fut jsonString |
+	fut := [ client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"
+	jsonString := STONJSON toString: json.
+	client
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	client
+		url: url;
+		entity: (ZnEntity with: jsonString type: ZnMimeType applicationJson);
+		ifFail: [ :ex | 
+			Transcript show: ex asString;cr.
+			UIManager default
+				inform: 'Network Error: ' , ex asString;
+				cr ];
+		patch.
 	client contents ] future.
 	^ fut
 ]

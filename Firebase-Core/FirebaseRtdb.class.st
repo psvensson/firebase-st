@@ -16,6 +16,15 @@ FirebaseRtdb class >> new: firebase [
 ]
 
 { #category : #accessing }
+FirebaseRtdb >> deletePath: path [
+	| url token |
+	token := firebase connect.
+	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+		, '.json'.
+	^ firebase secureJSONDeleteCallTo: url token: token
+]
+
+{ #category : #accessing }
 FirebaseRtdb >> firebase [
 	^ firebase
 ]
@@ -34,6 +43,24 @@ FirebaseRtdb >> getPath: path [
 	url := 'https://' , firebase projectId , '.firebaseio.com' , path
 		, '.json'.
 	^ firebase secureJSONCallTo: url token: token
+]
+
+{ #category : #accessing }
+FirebaseRtdb >> patchPath: path obj: obj [
+	| url token |
+	token := firebase connect.
+	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+		, '.json'.
+	^ firebase secureJSONPatchCallTo: url JSONContent: obj token: token
+]
+
+{ #category : #accessing }
+FirebaseRtdb >> pushPath: path obj: obj [
+	| url token |
+	token := firebase connect.
+	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+		, '.json'.
+	^ firebase secureJSONCallTo: url JSONContent: obj token: token
 ]
 
 { #category : #accessing }
