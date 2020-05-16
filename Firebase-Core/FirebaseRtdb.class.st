@@ -1,3 +1,20 @@
+"
+Example usage;
+---------------
+|certificateString firebase rtdb data query|
+data := Dictionary new.
+data at: 'hej' put: 'svejs'.
+certificateString := 'opencobalt-firebase-adminsdk.json' asFileReference readStream contents.
+
+query := Dictionary new.
+query at: #orderBy put: '""$key""'.
+
+firebase := Firebase new: certificateString .
+rtdb := FirebaseRtdb new: firebase.
+
+(rtdb get: '/foo' query: query ) onSuccessDo: [ :res | Transcript show:'put result=',res asString;cr ].
+""(rtdb getPath: '/foo/bar') onSuccessDo: [ :res | Transcript show:'get result=',res asString;cr ]""
+"
 Class {
 	#name : #FirebaseRtdb,
 	#superclass : #Object,
@@ -32,6 +49,22 @@ FirebaseRtdb >> firebase [
 { #category : #accessing }
 FirebaseRtdb >> firebase: anObject [
 	firebase := anObject
+]
+
+{ #category : #accessing }
+FirebaseRtdb >> get: path query: query [
+	| url token params commands |
+	commands := #(startAt endAt limitToFirst limitToLast equalTo orderBy).
+	token := firebase connect.
+	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+		, '.json'.
+	params := '?'.
+	commands
+		do: [ :each | 
+			query
+				at: each
+				ifPresent: [ params := params , each , '=' , (query at: each) , '&' ] ].
+	^ firebase secureJSONCallTo: url token: token extraParams: params
 ]
 
 { #category : #accessing }

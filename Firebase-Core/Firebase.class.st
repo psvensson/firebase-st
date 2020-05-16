@@ -145,6 +145,27 @@ Firebase >> secureJSONCallTo: url token: token [
 ]
 
 { #category : #accessing }
+Firebase >> secureJSONCallTo: url token: token extraParams: params [
+	| fut finalurl |
+	fut := [ client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"
+	client
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	finalurl := url , params , 'access_token=' , token.
+	client
+		url: finalurl;
+		ifFail: [ :ex | 
+			UIManager default
+				inform: 'get Network Error: ' , ex asString;
+				cr ];
+		get.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
 Firebase >> secureJSONDeleteCallTo: url token: token [
 	| fut finalurl |
 	fut := [ 
