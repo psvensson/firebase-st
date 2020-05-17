@@ -12,6 +12,8 @@ Metacello new
 
 # Usage
 
+You need to generate a service account credential file in JSON format, which can be done either from the Firebase project settings page or from the Google Cloud console; https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+
 ```Smalltalk
 certificateString := 'opencobalt-firebase-adminsdk.json' asFileReference readStream contents.
 
@@ -33,4 +35,4 @@ rtdb := FirebaseRtdb new: firebase.
 
 getPath: path, deletePath: path, get: path query: query, putPaht: path obj: obj, pushPath: path obj: obj, patchPath: path obj: obj.
 
-pushPath adds new object to a path, pushPath pushes a new member of an array or an object of an existing path, pachPath replaces an existing path's proeprties with those proivded in the obj.
+putPath adds new object to a path, pushPath pushes a new member of an array or an object of an existing path, pachPath replaces an existing path's proeprties with those proivded in the obj.
