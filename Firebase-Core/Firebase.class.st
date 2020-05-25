@@ -34,8 +34,15 @@ Firebase class >> createJWTFromCertificate: cert [
 				at: 'aud' put: 'https://oauth2.googleapis.com/token';
 				at: 'exp' put: exp;
 				at: 'iat' put: iat).
-	jws key: (CCConnection getNakedPrivateKey: (cert at: 'private_key')).
+	jws key: (Firebase getNakedPrivateKey: (cert at: 'private_key')).
 	^ jws compactSerialized
+]
+
+{ #category : #generating }
+Firebase class >> getNakedPrivateKey: keystring [
+	| key |
+	key := keystring copyReplaceAll: '-----BEGIN PRIVATE KEY-----\n' with: ''.
+	^  key copyReplaceAll: '\n-----END PRIVATE KEY-----\n' with: ''.
 ]
 
 { #category : #generating }
