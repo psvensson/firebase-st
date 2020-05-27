@@ -104,13 +104,13 @@ Firebase >> projectId [
 ]
 
 { #category : #accessing }
-Firebase >> secureFirestoreJSONCallTo: url JSONContent: json name: name token: token [
+Firebase >> secureFirestoreJSONCallTo: url JSONContent: json id: id token: token [
 	| fut jsonString mapValue newValue finalurl |
 	fut := [ mapValue := FirestoreJsonWriter toString: json.
 	newValue := mapValue copyFrom: 15 to: mapValue size - 1.
 	jsonString := '{' , newValue.
-	finalurl := name isNil
-		ifFalse: [ url , '?documentId=' , name ]
+	finalurl := id isNil
+		ifFalse: [ url , '?documentId=' , id ]
 		ifTrue: [ url ].
 	client headerAt: 'Authorization' put: 'Bearer ' , token.
 	client headerAt: 'Accept' put: '*/*'.
