@@ -1,3 +1,21 @@
+"
+Test like this;
+----------------
+
+|certificateString firebase firestore data query res|
+data := Dictionary new.
+data at: 'hej' put: 'svejs'.
+certificateString := 'service_account.json' asFileReference readStream contents.
+
+firebase := Firebase new: certificateString .
+firestore := Firestore new: firebase.
+
+res := firestore create: 'bar' name: 'baz' document: data.
+res onSuccessDo: [ :s | Transcript show:'Success: ',s asString;cr ].
+res onFailureDo: [ :e | Transcript show:'Failure: ',e asString;cr ].
+res
+
+"
 Class {
 	#name : #Firestore,
 	#superclass : #Object,
@@ -23,9 +41,7 @@ Firestore >> create: path name: name document: document [
 	token := firebase connect.
 	url := 'https://firestore.googleapis.com/v1beta1/projects/'
 		, firebase projectId , '/databases/(default)/documents/' , path.
-	Transcript
-		show: 'firestore create: ' , url;
-		cr.
+	
 	^ firebase
 		secureFirestoreJSONCallTo: url
 		JSONContent: document
