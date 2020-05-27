@@ -19,10 +19,8 @@ Firebase class >> certificateFromJSONString: aString [
 { #category : #generating }
 Firebase class >> createJWTFromCertificate: cert [
 	| jws iat exp scopes |
-	scopes := 'https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email'.
-	"Transcript
-		show: 'scopes; ' , scopes asString;
-		cr."
+	"NOTE: scapes are space-delimited"
+	scopes := 'https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/datastore'.	
 	iat := DateAndTime now asUnixTime.
 	exp := iat + (59 * 60).
 	jws := JsonWebSignature new
@@ -34,7 +32,7 @@ Firebase class >> createJWTFromCertificate: cert [
 				at: 'aud' put: 'https://oauth2.googleapis.com/token';
 				at: 'exp' put: exp;
 				at: 'iat' put: iat).
-	jws key: (Firebase getNakedPrivateKey: (cert at: 'private_key')).
+	jws key: (self getNakedPrivateKey: (cert at: 'private_key')).
 	^ jws compactSerialized
 ]
 
@@ -106,6 +104,53 @@ Firebase >> projectId [
 ]
 
 { #category : #accessing }
+Firebase >> secureFirestoreJSONCallTo: url JSONContent: json name: name token: token [
+	| fut jsonString mapValue newValue |	
+	fut := [ 
+		mapValue:= (FirestoreJsonWriter toString: json).
+		newValue := mapValue copyFrom: 15 to: mapValue size - 1.
+		jsonString := '{ ',newValue.
+	client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"
+	Transcript show:'secureFirestoreCall calling ---> ',jsonString;cr.
+	client
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	client
+		url: url;
+		entity: (ZnEntity with: jsonString type: ZnMimeType applicationJson);
+		ifFail: [ :ex | 
+			UIManager default
+				inform: 'post Network Error: ' , ex asString ];
+		post.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
+Firebase >> secureFirestoreJSONCallTo: url JSONContent: json token: token [
+	| fut jsonString |
+	fut := [ jsonString := FirestoreJsonWriter toString: json.
+	client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"
+	Transcript show:'secureFirestoreCall calling .. ',jsonString;cr.
+	client
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	client
+		url: url;
+		entity: (ZnEntity with: jsonString type: ZnMimeType applicationJson);
+		ifFail: [ :ex | 
+			UIManager default
+				inform: 'post Network Error: ' , ex asString ];
+		post.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
 Firebase >> secureJSONCallTo: url JSONContent: json token: token [
 	| fut jsonString |
 	fut := [ jsonString := STONJSON toString: json.
@@ -120,8 +165,7 @@ Firebase >> secureJSONCallTo: url JSONContent: json token: token [
 		entity: (ZnEntity with: jsonString type: ZnMimeType applicationJson);
 		ifFail: [ :ex | 
 			UIManager default
-				inform: 'post Network Error: ' , ex asString;
-				cr ];
+				inform: 'post Network Error: ' , ex asString ];
 		post.
 	client contents ] future.
 	^ fut
@@ -144,8 +188,7 @@ Firebase >> secureJSONCallTo: url token: token [
 		url: finalurl;
 		ifFail: [ :ex | 
 			UIManager default
-				inform: 'get Network Error: ' , ex asString;
-				cr ];
+				inform: 'get Network Error: ' , ex asString ];
 		get.
 	client contents ] future.
 	^ fut
@@ -165,8 +208,7 @@ Firebase >> secureJSONCallTo: url token: token extraParams: params [
 		url: finalurl;
 		ifFail: [ :ex | 
 			UIManager default
-				inform: 'get Network Error: ' , ex asString;
-				cr ];
+				inform: 'get Network Error: ' , ex asString ];
 		get.
 	client contents ] future.
 	^ fut
@@ -189,8 +231,7 @@ Firebase >> secureJSONDeleteCallTo: url token: token [
 		url: finalurl;
 		ifFail: [ :ex | 
 			UIManager default
-				inform: 'delete Network Error: ' , ex asString;
-				cr ];
+				inform: 'delete Network Error: ' , ex asString ];
 		delete.
 	client contents ] future.
 	^ fut
@@ -212,8 +253,7 @@ Firebase >> secureJSONPatchCallTo: url JSONContent: json token: token [
 		ifFail: [ :ex | 
 			Transcript show: ex asString;cr.
 			UIManager default
-				inform: 'Network Error: ' , ex asString;
-				cr ];
+				inform: 'Network Error: ' , ex asString ];
 		patch.
 	client contents ] future.
 	^ fut
@@ -235,8 +275,7 @@ Firebase >> secureJSONPutCallTo: url JSONContent: json token: token [
 		ifFail: [ :ex | 
 			Transcript show: ex asString;cr.
 			UIManager default
-				inform: 'Network Error: ' , ex asString;
-				cr ];
+				inform: 'Network Error: ' , ex asString ];
 		put.
 	client contents ] future.
 	^ fut
