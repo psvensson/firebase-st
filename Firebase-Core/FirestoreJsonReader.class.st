@@ -5,12 +5,26 @@ Class {
 }
 
 { #category : #convenience }
+FirestoreJsonReader class >> fromDocument: rv [
+	rv
+		at: #fields
+		ifPresent: [ rv at: #fields put: (self reverseMap: (rv at: #fields)) ].
+	rv
+		at: #documents
+		ifPresent: [ rv
+				at: #documents
+				put: ((rv at: #documents) collect: [ :each | 
+					Transcript show:'collecting document ',each asString;cr.
+					self fromDocument: each ]) ].
+	^ rv
+]
+
+{ #category : #convenience }
 FirestoreJsonReader class >> fromString: string [
 	| rv |
 	rv := (self on: string readStream) next.
 	"TODO: Ensure that the 'fields' property is handled and type cruft removed from values"
-	rv at: #fields put: (self reverseMap: (rv at: #fields)).
-	^ rv
+	^ self fromDocument: rv
 ]
 
 { #category : #convenience }
@@ -28,7 +42,7 @@ FirestoreJsonReader class >> reverseArray: value [
 	^ value  collect: [ :each | | key val |
 		key := each keys first.
 		val := each at: key.
-		Transcript show:'reverseMap mapping ',key,' -> ',value asString;cr.
+		"Transcript show:'reverseMap mapping ',key,' -> ',value asString;cr."
 		val ]
 	
 ]
@@ -40,9 +54,9 @@ FirestoreJsonReader class >> reverseMap: aDict [
 	aDict
 		keysAndValuesDo:
 			[ :key :value | | val |
-			Transcript show:'reverseMap mapping ............................ ',key;cr.
+			"Transcript show:'reverseMap mapping ............................ ',key;cr."
 			val := self getCorrectValueFor: value.
-			Transcript show:'reverseMap mapping ',key,' -> ',value asString;cr.
+			"Transcript show:'reverseMap mapping ',key,' -> ',value asString;cr."
 			rv at: key put: val ].
 	^ rv
 ]

@@ -104,6 +104,27 @@ Firebase >> projectId [
 ]
 
 { #category : #accessing }
+Firebase >> secureFirestoreCallTo: url token: token [
+	| fut jsonString |
+	fut := [ client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"
+	client
+		contentReader: [ :entity | 
+			Transcript show: 'json string in: ' , entity contents.
+			FirestoreJsonReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	Transcript show: 'url -> ',url;cr.
+	client
+		url: url;
+		ifFail:
+				[ :ex | UIManager default inform: 'post Network Error: ' , ex asString ];
+		get.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
 Firebase >> secureFirestoreJSONCallTo: url JSONContent: json id: id token: token [
 	| fut jsonString mapValue newValue finalurl |
 	fut := [ mapValue := FirestoreJsonWriter toString: json.
@@ -140,7 +161,9 @@ Firebase >> secureFirestoreJSONCallTo: url JSONContent: json token: token [
 	"headerAt: 'Content-Type' put: 'application/json';"
 	Transcript show:'secureFirestoreCall calling .. ',jsonString;cr.
 	client
-		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+		contentReader: [ :entity | 
+			Transcript show:'json string in: ',entity contents.
+			FirestoreJsonReader fromString: entity contents ].
 	"request setBearerAuthentication: token;"
 	client
 		url: url;
@@ -182,9 +205,7 @@ Firebase >> secureJSONCallTo: url token: token [
 	client headerAt: 'Accept' put: '*/*'.
 	"headerAt: 'Content-Type' put: 'application/json';"
 	client
-		contentReader: [ :entity | 
-			Transcript show:'json string in: ',entity contents.
-			FirestoreJsonReader fromString: entity contents ].
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
 	"request setBearerAuthentication: token;"
 	finalurl :=	url,'?access_token=',token.
 	"finalurl := url."

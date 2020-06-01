@@ -69,6 +69,21 @@ Firestore >> get: path [
 		, firebase projectId , '/databases/(default)/documents/' , path.
 	
 	^ firebase
-		secureJSONCallTo: url
+		secureFirestoreCallTo: url
 		token: token
+]
+
+{ #category : #accessing }
+Firestore >> list: path pageSize: pageSize pageToken: pageToken orderBy: orderBy [
+	"GET https://firestore.googleapis.com/v1beta1/{name=projects/*/databases/*/documents/*/**}"
+
+	| url token |
+	token := firebase connect.
+	url := 'https://firestore.googleapis.com/v1beta1/projects/'
+		, firebase projectId , '/databases/(default)/documents/' , path
+		, '?showMissing=true'.
+	pageSize ifNotNil: [ url := url , '&pageSize=' , pageSize ].
+	pageToken ifNotNil: [ url := url , '&pageToken=' , pageToken ].
+	orderBy ifNotNil: [ url := url , '&orderBy=' , orderBy ].
+	^ firebase secureFirestoreCallTo: url token: token
 ]
