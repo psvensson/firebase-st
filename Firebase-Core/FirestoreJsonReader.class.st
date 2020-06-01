@@ -14,7 +14,7 @@ FirestoreJsonReader class >> fromDocument: rv [
 		ifPresent: [ rv
 				at: #documents
 				put: ((rv at: #documents) collect: [ :each | 
-					Transcript show:'collecting document ',each asString;cr.
+					"Transcript show:'collecting document ',each asString;cr."
 					self fromDocument: each ]) ].
 	^ rv
 ]

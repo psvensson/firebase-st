@@ -87,3 +87,21 @@ Firestore >> list: path pageSize: pageSize pageToken: pageToken orderBy: orderBy
 	orderBy ifNotNil: [ url := url , '&orderBy=' , orderBy ].
 	^ firebase secureFirestoreCallTo: url token: token
 ]
+
+{ #category : #accessing }
+Firestore >> patch: path document: document [
+	"https://firestore.googleapis.com/v1beta1/{parent=projects/*/databases/*/documents/**}/{collectionId}"
+
+	| url token updateMask |
+	updateMask := ''.
+	document keysDo: [ :key | updateMask := updateMask , '&updateMask.fieldPaths=',key asString ].
+	updateMask at: 1 put: $?.
+	token := firebase connect.
+	url := 'https://firestore.googleapis.com/v1beta1/projects/'
+		, firebase projectId , '/databases/(default)/documents/' , path.
+	
+	^ firebase 
+		secureFirestorePatchJSONCallTo: url
+		JSONContent: document
+		token: token
+]

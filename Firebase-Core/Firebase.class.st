@@ -135,10 +135,7 @@ Firebase >> secureFirestoreJSONCallTo: url JSONContent: json id: id token: token
 		ifTrue: [ url ].
 	client headerAt: 'Authorization' put: 'Bearer ' , token.
 	client headerAt: 'Accept' put: '*/*'.
-	"headerAt: 'Content-Type' put: 'application/json';"
-	Transcript
-		show: 'secureFirestoreCall calling ---> ' , jsonString;
-		cr.
+	"headerAt: 'Content-Type' put: 'application/json';"	
 	client
 		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
 	"request setBearerAuthentication: token;"
@@ -172,6 +169,28 @@ Firebase >> secureFirestoreJSONCallTo: url JSONContent: json token: token [
 			UIManager default
 				inform: 'post Network Error: ' , ex asString ];
 		post.
+	client contents ] future.
+	^ fut
+]
+
+{ #category : #accessing }
+Firebase >> secureFirestorePatchJSONCallTo: url JSONContent: json token: token [
+	| fut jsonString mapValue newValue |
+	fut := [ mapValue := FirestoreJsonWriter toString: json.
+	newValue := mapValue copyFrom: 15 to: mapValue size - 1.
+	jsonString := '{' , newValue.	
+	client headerAt: 'Authorization' put: 'Bearer ' , token.
+	client headerAt: 'Accept' put: '*/*'.
+	"headerAt: 'Content-Type' put: 'application/json';"	
+	client
+		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+	"request setBearerAuthentication: token;"
+	client
+		url: url;
+		entity: (ZnEntity with: jsonString type: ZnMimeType applicationJson);
+		ifFail:
+				[ :ex | UIManager default inform: 'post Network Error: ' , ex asString ];
+		patch.
 	client contents ] future.
 	^ fut
 ]
