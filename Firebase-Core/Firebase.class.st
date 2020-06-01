@@ -182,7 +182,9 @@ Firebase >> secureJSONCallTo: url token: token [
 	client headerAt: 'Accept' put: '*/*'.
 	"headerAt: 'Content-Type' put: 'application/json';"
 	client
-		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+		contentReader: [ :entity | 
+			Transcript show:'json string in: ',entity contents.
+			FirestoreJsonReader fromString: entity contents ].
 	"request setBearerAuthentication: token;"
 	finalurl :=	url,'?access_token=',token.
 	"finalurl := url."
