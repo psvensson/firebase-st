@@ -199,18 +199,22 @@ Firebase >> secureFirestorePatchJSONCallTo: url JSONContent: json token: token [
 Firebase >> secureJSONCallTo: url JSONContent: json token: token [
 	| fut jsonString |
 	fut := [ jsonString := STONJSON toString: json.
+		Transcript show:'secureJSONCall json; ',jsonString;cr.
 	client headerAt: 'Authorization' put: 'Bearer ' , token.
 	client headerAt: 'Accept' put: '*/*'.
 	"headerAt: 'Content-Type' put: 'application/json';"
 	client
-		contentReader: [ :entity | NeoJSONReader fromString: entity contents ].
+		contentReader: [ :entity | 
+			| rv |
+			rv := NeoJSONReader fromString: entity contents.
+			rv ].
 	"request setBearerAuthentication: token;"
 	client
 		url: url;
 		entity: (ZnEntity with: jsonString type: ZnMimeType applicationJson);
 		ifFail: [ :ex | 
-			UIManager default
-				inform: 'post Network Error: ' , ex asString ];
+			ex inspect.
+			UIManager default inform: 'post Network Error: ' , ex asString ];
 		post.
 	client contents ] future.
 	^ fut

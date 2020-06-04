@@ -73,6 +73,93 @@ Firestore >> get: path [
 		token: token
 ]
 
+{ #category : #'as yet unclassified' }
+Firestore >> getFilter: filterString [
+	| filter parts prop op val fieldPath fieldFilter |
+	parts := filterString findTokens: '.'.
+	prop := parts at: 1.
+	op := parts at: 2.
+	val := parts at: 3.
+	fieldPath := Dictionary new.
+	fieldPath at: 'fieldPath' put: prop.
+	filter := Dictionary new.
+	fieldFilter := Dictionary new.
+	filter at: 'fieldFilter' put: fieldFilter.
+	fieldFilter at: #field put: fieldPath.
+	fieldFilter at: 'op' put: op.
+	fieldFilter at: 'value' put: (self getFilterValue: val).
+	Transcript
+		show: 'getFilter for ' , filterString , ' returns ' , filter asString;
+		cr.
+	^ filter
+]
+
+{ #category : #accessing }
+Firestore >> getFilterValue: val [
+	| filterValue |
+	filterValue := Dictionary new.
+	val isString
+		ifTrue: [ filterValue at: #stringValue put: val ].
+	val isInteger
+		ifTrue: [ filterValue at: #integerValue put: val ].
+	val isFloat
+		ifTrue: [ filterValue at: #doubleValue put: val ].
+	val ifNil: [ filterValue at: #nullValue put: val ].
+	(val = false or: val = true)
+		ifTrue: [ filterValue at: #booleanValue put: val ].
+	Transcript show:'getFilterValue for ',val asString,' returns ',filterValue asString;cr.
+	^ filterValue
+]
+
+{ #category : #'as yet unclassified' }
+Firestore >> getOrderBy: query [
+	| rv orderBy fieldpath |
+	fieldpath := Dictionary new.
+	fieldpath at: #fieldPath put: (query at: #orderBy).	
+	orderBy := Dictionary new.
+	orderBy at: #field put: fieldpath.
+	orderBy
+		at: #direction
+		put:
+			(query
+				at: #direction
+				ifPresent: [ query at: #direction ]
+				ifAbsent: [ 'DESCENDING' ]).
+	rv := orderBy.
+	Transcript show:'getOrderBy returns ',rv asString;cr.
+	^ rv
+]
+
+{ #category : #'as yet unclassified' }
+Firestore >> getSelect: query [
+	| select fields |
+	fields := (query at: #select)
+		collect: [ :each | 
+			| fieldPath |
+			fieldPath := Dictionary new.
+			fieldPath at: #fieldPath put: each.
+			fieldPath ].
+	select := Dictionary new.
+	select at: #fields put: fields.
+	Transcript
+		show: 'getSelect returns ' , select asString;
+		cr.
+	^ select
+]
+
+{ #category : #'as yet unclassified' }
+Firestore >> getWhere: query [
+	| where compositeFilter filters rv |
+	where := Dictionary new.
+	compositeFilter := Dictionary new.
+	where at: #compositeFilter put: compositeFilter .
+	compositeFilter at: #op put: (query at: #op ifPresent: [ query at: #op ] ifAbsent: ['AND']).
+	filters := ((query at: #where ) collect: [:each | self getFilter: each]).
+	compositeFilter at: #filters put: filters.	
+	Transcript show:'getWhere returns ',where asString;cr.
+	^ where
+]
+
 { #category : #accessing }
 Firestore >> list: path pageSize: pageSize pageToken: pageToken orderBy: orderBy [
 	"GET https://firestore.googleapis.com/v1beta1/{name=projects/*/databases/*/documents/*/**}"
@@ -104,4 +191,38 @@ Firestore >> patch: path document: document [
 		secureFirestorePatchJSONCallTo: url
 		JSONContent: document
 		token: token
+]
+
+{ #category : #accessing }
+Firestore >> runQuery: query [
+	"https://www.jeansnyman.com/posts/google-firestore-rest-api-examples/"
+
+	| url token sq obj collection |
+	obj := Dictionary new.
+	collection := Dictionary new.
+	collection at: #collectionId put: (query at: #from).
+	obj
+		at: #from
+		put:
+			(Array
+				new;
+				with: collection).
+	query
+		at: #orderBy
+		ifPresent: [ obj at: #orderBy put: (self getOrderBy: query) ].
+	query
+		at: #select
+		ifPresent: [ obj at: #select put: (self getSelect: query) ].
+	query
+		at: #where
+		ifPresent: [ obj at: #where put: (self getWhere: query) ].
+	query
+		at: #limit
+		ifPresent: [ obj at: #limit put: (query at: #limit) ].
+	sq := Dictionary new.
+	sq at: #structuredQuery put: obj.
+	token := firebase connect.
+	url := 'https://firestore.googleapis.com/v1beta1/projects/'
+		, firebase projectId , '/databases/(default)/documents:runQuery'.
+	^ firebase secureJSONCallTo: url JSONContent: sq token: token
 ]
