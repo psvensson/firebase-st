@@ -35,13 +35,13 @@ rtdb := FirebaseRtdb new: firebase.
 
 Rtdb is the original firestore real-time database. All data for a project resides in one large JSON structure, so be careful what you get or query, as you might get back quite a lot of data. Queries can only be made at one property at a time, which limits the use a bit.
 
-getPath: path
-deletePath: path
-get: path 
-query: query
-putPath: path obj: obj
-pushPath: path obj: obj
-patchPath: path obj: obj
+* getPath: path "get data under path"
+* deletePath: path "delete data from path"
+* get: path "get data at path but not under"
+* query: query "see example above"
+* putPath: path obj: obj "add data under path"
+* pushPath: path obj: obj "add data to array on object path"
+* patchPath: path obj: obj "update data on path"
 
 putPath adds new object to a path, pushPath pushes a new member of an array or an object of an existing path, pachPath replaces an existing path's proeprties with those proivded in the obj.
 
@@ -97,11 +97,11 @@ A list of possible where operators can be found here; https://firebase.google.co
 
 # Methods for Firestore
 
-list: path pageSize: pageSize pageToken: pageToken orderBy: orderBy  "All can be nil except for 'path'"
-create: path id:id document: document "path is the colelction name and id (if not nil) is the desired id. If nil, an id will be generated"
-get: path "Get the document on the path, like 'bar/whoop2'"
-patch: path document: document "Update an existing document"
-runQuery: query "Query properties can be any of from, select, where, direction and orderBy
+* list: path pageSize: pageSize pageToken: pageToken orderBy: orderBy  "All can be nil except for 'path'"
+* create: path id:id document: document "path is the colelction name and id (if not nil) is the desired id. If nil, an id will be generated"
+* get: path "Get the document on the path, like 'bar/whoop2'"
+* patch: path document: document "Update an existing document"
+* runQuery: query "Query properties can be any of from, select, where, direction and orderBy
 
 
 
