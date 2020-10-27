@@ -36,16 +36,34 @@ Firestore class >> new: firebase [
 { #category : #accessing }
 Firestore >> create: path id:id document: document [
 	"https://firestore.googleapis.com/v1beta1/{parent=projects/*/databases/*/documents/**}/{collectionId}"
-
 	| url token |
+	Transcript show:'Firestore#create id=',id asString;cr.
 	token := firebase connect.
-	url := 'https://firestore.googleapis.com/v1beta1/projects/'
-		, firebase projectId , '/databases/(default)/documents/' , path.
-	
+	url := ('https://firestore.googleapis.com/v1beta1/projects/'
+		, firebase projectId , '/databases/(default)/documents/' , path asString)  .
+	Transcript show:'Firestore#create url=',url;cr.
+	Transcript show:'document=',document asString;cr.
 	^ firebase
 		secureFirestoreJSONCallTo: url
 		JSONContent: document
 		id: id
+		token: token
+]
+
+{ #category : #accessing }
+Firestore >> createDirect: path id:id document: document [
+	"https://firestore.googleapis.com/v1beta1/{parent=projects/*/databases/*/documents/**}/{collectionId}"
+	| url token |
+	Transcript show:'Firestore#create id=',id asString;cr.
+	token := firebase connect.
+	url := ('https://firestore.googleapis.com/v1beta1/projects/'
+		, firebase projectId , '/databases/(default)/documents/' , path asString) asLowercase .
+	Transcript show:'Firestore#create url=',url;cr.
+	Transcript show:'document=',document asString;cr.
+	^ firebase
+		secureDirectFirestoreJSONCallTo: url
+		JSONContent: document
+		id: id asString
 		token: token
 ]
 
@@ -225,4 +243,38 @@ Firestore >> runQuery: query [
 	url := 'https://firestore.googleapis.com/v1beta1/projects/'
 		, firebase projectId , '/databases/(default)/documents:runQuery'.
 	^ firebase secureJSONCallTo: url JSONContent: sq token: token
+]
+
+{ #category : #accessing }
+Firestore >> runQueryDirect: query [
+	"https://www.jeansnyman.com/posts/google-firestore-rest-api-examples/"
+
+	| url token sq obj collection |
+	obj := Dictionary new.
+	collection := Dictionary new.
+	collection at: #collectionId put: (query at: #from) asLowercase .
+	obj
+		at: #from
+		put:
+			(Array
+				new;
+				with: collection).
+	query
+		at: #orderBy
+		ifPresent: [ obj at: #orderBy put: (self getOrderBy: query) ].
+	query
+		at: #select
+		ifPresent: [ obj at: #select put: (self getSelect: query) ].
+	query
+		at: #where
+		ifPresent: [ obj at: #where put: (self getWhere: query) ].
+	query
+		at: #limit
+		ifPresent: [ obj at: #limit put: (query at: #limit) ].
+	sq := Dictionary new.
+	sq at: #structuredQuery put: obj.
+	token := firebase connect.
+	url := 'https://firestore.googleapis.com/v1beta1/projects/'
+		, firebase projectId , '/databases/(default)/documents:runQuery'.
+	^ firebase secureDirectJSONCallTo: url JSONContent: sq token: token
 ]
