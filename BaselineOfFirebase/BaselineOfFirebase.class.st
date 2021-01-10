@@ -16,7 +16,7 @@ BaselineOfFirebase >> baseline: spec [
 				with: [ spec repository: 'github://svenvc/NeoJSON/repository' ].
 			spec
 				baseline: 'JSONWebToken'
-				with: [ spec repository: 'github://noha/JSONWebToken:master/source' ].
+				with: [ spec repository: 'github://noha/JSONWebToken/source' ].
 			spec
 				baseline: 'TaskIt'
 				with: [ spec repository: 'github://sbragagnolo/taskit' ].
