@@ -95,6 +95,21 @@ res
 This is a complex query with one 'where' clause which also filte rout just the proeprties you want to seee using 'select'.
 A list of possible where operators can be found here; https://firebase.google.com/docs/firestore/reference/rest/v1beta1/StructuredQuery#FieldFilter
 
+```Smalltalk
+query := Dictionary new.
+query 
+	at: #from put: #bar
+	;at: #offset put: 3	
+	;at: #direction put: 'ASCENDING'.
+
+res := firestore runQuery: query.
+res onSuccessDo: [ :s | Transcript show:'Success: ',s asString;cr. s inspect].
+res onFailureDo: [ :e | Transcript show:'Failure: ',e asString;cr ].
+res
+```
+
+And the above is a simple query which uses offset, to enable a simple form of pagination.
+
 # Methods for Firestore
 
 * list: path pageSize: pageSize pageToken: pageToken orderBy: orderBy  "All can be nil except for 'path'"
