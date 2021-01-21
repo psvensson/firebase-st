@@ -116,7 +116,7 @@ And the above is a simple query which uses offset, to enable a simple form of pa
 * create: path id:id document: document "path is the colelction name and id (if not nil) is the desired id. If nil, an id will be generated"
 * get: path "Get the document on the path, like 'bar/whoop2'"
 * patch: path document: document "Update an existing document"
-* runQuery: query "Query properties can be any of from, select, where, direction and orderBy
+* runQuery: query "Query properties can be any of from, select, where, direction, limit, offset and orderBy
 
 
 
