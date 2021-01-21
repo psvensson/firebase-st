@@ -237,6 +237,9 @@ Firestore >> runQuery: query [
 	query
 		at: #limit
 		ifPresent: [ obj at: #limit put: (query at: #limit) ].
+	query
+		at: #offset
+		ifPresent: [ obj at: #offset put: (query at: #offset) ].	
 	sq := Dictionary new.
 	sq at: #structuredQuery put: obj.
 	token := firebase connect.
