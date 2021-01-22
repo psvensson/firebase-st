@@ -10,10 +10,7 @@ BaselineOfFirebase >> baseline: spec [
 	spec
 		for: #common
 		do: [ spec
-				package: 'Firebase-Core'.
-			spec
-				baseline: 'NeoJSON'
-				with: [ spec repository: 'github://svenvc/NeoJSON/repository' ].
+				package: 'Firebase-Core'.			
 			spec
 				baseline: 'JSONWebToken'
 				with: [ spec repository: 'github://noha/JSONWebToken/source' ].
