@@ -19,7 +19,10 @@ Class {
 	#name : #FirebaseRtdb,
 	#superclass : #Object,
 	#instVars : [
-		'firebase'
+		'firebase',
+		'region',
+		'urlsuffix',
+		'databaseName'
 	],
 	#category : #'Firebase-Core'
 }
@@ -33,10 +36,23 @@ FirebaseRtdb class >> new: firebase [
 ]
 
 { #category : #accessing }
+FirebaseRtdb >> databaseName [
+	^ databaseName 
+		ifNil: [ firebase projectId ]
+		ifNotNil: [  databaseName ]
+]
+
+{ #category : #accessing }
+FirebaseRtdb >> databaseName: aString [
+	databaseName := aString
+
+]
+
+{ #category : #accessing }
 FirebaseRtdb >> deletePath: path [
 	| url token |
 	token := firebase connect.
-	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+	url := 'https://' , self databaseName , '.', urlsuffix , path
 		, '.json'.
 	^ firebase secureJSONDeleteCallTo: url token: token
 ]
@@ -56,7 +72,7 @@ FirebaseRtdb >> get: path query: query [
 	| url token params commands |
 	commands := #(startAt endAt limitToFirst limitToLast equalTo orderBy).
 	token := firebase connect.
-	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+	url := 'https://' , self databaseName , '.', urlsuffix, path
 		, '.json'.
 	params := '?'.
 	commands
@@ -64,6 +80,7 @@ FirebaseRtdb >> get: path query: query [
 			query
 				at: each
 				ifPresent: [ params := params , each , '=' , (query at: each) , '&' ] ].
+	
 	^ firebase secureJSONCallTo: url token: token extraParams: params
 ]
 
@@ -73,7 +90,7 @@ FirebaseRtdb >> getPath: path [
 
 	| url token |
 	token := firebase connect.
-	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+	url := 'https://' , self databaseName , '.', urlsuffix , path
 		, '.json'.
 	^ firebase secureJSONCallTo: url token: token
 ]
@@ -82,7 +99,7 @@ FirebaseRtdb >> getPath: path [
 FirebaseRtdb >> patchPath: path obj: obj [
 	| url token |
 	token := firebase connect.
-	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+	url := 'https://' , self databaseName , '.', urlsuffix , path
 		, '.json'.
 	^ firebase secureJSONPatchCallTo: url JSONContent: obj token: token
 ]
@@ -91,7 +108,7 @@ FirebaseRtdb >> patchPath: path obj: obj [
 FirebaseRtdb >> pushPath: path obj: obj [
 	| url token |
 	token := firebase connect.
-	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+	url := 'https://' , self databaseName , '.', urlsuffix , path
 		, '.json'.
 	^ firebase secureJSONCallTo: url JSONContent: obj token: token
 ]
@@ -100,7 +117,15 @@ FirebaseRtdb >> pushPath: path obj: obj [
 FirebaseRtdb >> putPath: path obj: obj [
 	| url token |
 	token := firebase connect.
-	url := 'https://' , firebase projectId , '.firebaseio.com' , path
+	url := 'https://' , self databaseName, '.', urlsuffix , path
 		, '.json'.
 	^ firebase secureJSONPutCallTo: url JSONContent: obj token: token
+]
+
+{ #category : #accessing }
+FirebaseRtdb >> region: aString [
+	region := aString.
+	urlsuffix := (region = 'Belgium')
+		ifTrue: [ 'europe-west1.firebasedatabase.app' ]
+		ifFalse: [ 'firebaseio.com' ]
 ]
