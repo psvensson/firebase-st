@@ -96,6 +96,11 @@ FirebaseRtdb >> getPath: path [
 ]
 
 { #category : #accessing }
+FirebaseRtdb >> initialize [ 
+	urlsuffix := 'firebaseio.com' "As the most common default, but can be changed by setting #region:"
+]
+
+{ #category : #accessing }
 FirebaseRtdb >> patchPath: path obj: obj [
 	| url token |
 	token := firebase connect.
@@ -127,5 +132,4 @@ FirebaseRtdb >> region: aString [
 	region := aString.
 	urlsuffix := (region = 'Belgium')
 		ifTrue: [ 'europe-west1.firebasedatabase.app' ]
-		ifFalse: [ 'firebaseio.com' ]
 ]
