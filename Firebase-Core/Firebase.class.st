@@ -107,7 +107,7 @@ Firebase >> projectId [
 Firebase >> secureDirectFirestoreJSONCallTo: url JSONContent: json id: id token: token [
 	| jsonString mapValue newValue finalurl |
 	Transcript
-		show: 'secureFirestoreJSONCallTo';
+		show: 'secureFirestoreJSONCallTo...';
 		cr.
 	
 	mapValue := FirestoreJsonWriter toString: json.
@@ -183,9 +183,9 @@ Firebase >> secureFirestoreCallTo: url token: token [
 { #category : #accessing }
 Firebase >> secureFirestoreJSONCallTo: url JSONContent: json id: id token: token [
 	| fut jsonString mapValue newValue finalurl |
-	Transcript show:'secureFirestoreJSONCallTo';cr.
-	fut := [ 
-		Transcript show:'original json=',json;cr.
+	Transcript show:'secureFirestoreJSONCallTo url json id token';cr.
+	Transcript show:'original json=',json asString;cr.
+	fut := [ 		
 		mapValue := FirestoreJsonWriter toString: json.
 	newValue := mapValue copyFrom: 15 to: mapValue size - 1.
 	jsonString := '{' , newValue.
