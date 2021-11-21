@@ -19,7 +19,7 @@ certificateString := 'opencobalt-firebase-adminsdk.json' asFileReference readStr
 
 "push put and patch uses dictionaries as objects"
 obj := Dictionary new.
-obj at: #abc put: 'foobar'
+obj at: #abc put: 'foobar'.
 
 "queries are also objects, and which keys can be any of; startAt endAt limitToFirst limitToLast equalTo orderBy)"
 query := Dictionary new.
