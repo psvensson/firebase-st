@@ -9,8 +9,13 @@ BaselineOfFirebase >> baseline: spec [
 	<baseline>
 	spec
 		for: #common
-		do: [ spec
-				package: 'Firebase-Core'.
+		do: [ 
+			spec
+				baseline: 'NeoJSON'
+				with: [ spec repository: 'github://svenvc/NeoJSON:master/repository' ].
+			spec
+				package: 'Firebase-Core'
+				with: [ spec requires: #('NeoJSON') ].
 			spec
 				baseline: 'TaskIt'
 				with: [ spec repository: 'github://sbragagnolo/taskit' ].
